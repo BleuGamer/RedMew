@@ -81,11 +81,11 @@ local changelog_callback = Token.register(process_changelog)
 
 local function prepare_title()
     local welcome_title = [[
-111111  1111111 111111  111    111 1111111 11     11
-11   11 11      11   11 1111  1111 11      11     11
-111111  11111   11   11 11 1111 11 11111   11  1  11
-11   11 11      11   11 11  11  11 11      11 111 11
-11   11 1111111 111111  11      11 1111111  111 111
+111111      11 11111111 11111111 1111111 111111   11   111111 1111 11  11
+11   11    11  11       11       11   11 11    11 11   11  11 11   11 11 
+111111    11   11111111 111111   1111111 111111   11   11  11 1    1111  
+11   11  11          11 11       11   11 11    11 11   11  11 11   11 11 
+11   11 11     11111111 11111111 11   11 111111   1111 111111 1111 11  11
 ]]
 
     local row = {}
@@ -198,41 +198,36 @@ local pages = {
             discord_textbox_flow_style.horizontal_align = 'center'
             discord_textbox_flow_style.horizontally_stretchable = true
             discord_textbox_flow.add({type = 'label', caption = 'Discord: '}).style.font = 'default-bold'
-            local discord_textbox = discord_textbox_flow.add {type = 'text-box', text = 'https://www.redmew.com/discord '}
+            local discord_textbox = discord_textbox_flow.add {type = 'text-box', text = 'https://discord.gg/zkg8rdn '}
             discord_textbox.read_only = true
             discord_textbox.style.width = 235
             discord_textbox.style.height = 28
+
+
             centered_label(parent, {'info.links_patreon'})
             local patreon_flow = parent.add {type = 'flow', direction = 'horizontal'}
             local patreon_flow_style = patreon_flow.style
             patreon_flow_style.horizontal_align = 'center'
             patreon_flow_style.horizontally_stretchable = true
             patreon_flow.add({type = 'label', caption = 'Patreon:'}).style.font = 'default-bold'
-            local patreon_textbox = patreon_flow.add {type = 'text-box', text = 'https://www.patreon.com/redmew '}
+            local patreon_textbox = patreon_flow.add {type = 'text-box', text = 'https://www.patreon.com/Seablock '}
             patreon_textbox.read_only = true
             patreon_textbox.style.width = 235
             patreon_textbox.style.height = 28
-            centered_label(parent, {'info.links_saves'})
-            local save_textbox_flow = parent.add {type = 'flow'}
-            local save_textbox_flow_style = save_textbox_flow.style
-            save_textbox_flow_style.horizontal_align = 'center'
-            save_textbox_flow_style.horizontally_stretchable = true
-            save_textbox_flow.add({type = 'label', caption = 'Saves: '}).style.font = 'default-bold'
-            local save_textbox = save_textbox_flow.add {type = 'text-box', text = 'http://www.redmew.com/saves/ '}
-            save_textbox.read_only = true
-            save_textbox.style.width = 235
-            save_textbox.style.height = 28
-            centered_label(parent, {'info.links_factoriomaps'})
-            local maps_textbox_flow = parent.add {type = 'flow'}
-            local maps_textbox_flow_style = maps_textbox_flow.style
-            maps_textbox_flow_style.horizontal_align = 'center'
-            maps_textbox_flow_style.horizontally_stretchable = true
-            maps_textbox_flow.add({type = 'label', caption = 'Maps: '}).style.font = 'default-bold'
-            local maps_textbox = maps_textbox_flow.add {type = 'text-box', text = 'https://factoriomaps.com/browse/redmew.html '}
-            maps_textbox.read_only = true
-            maps_textbox.style.width = 315
-            maps_textbox.style.height = 28
 
+            centered_label(parent, {'info.links_redmew'})
+            local redmew_flow = parent.add {type = 'flow', direction = 'horizontal'}
+            local redmew_flow_style = redmew_flow.style
+            redmew_flow_style.horizontal_align = 'center'
+            redmew_flow_style.horizontally_stretchable = true
+            redmew_flow.add({type = 'label', caption = 'Redmew:'}).style.font = 'default-bold'
+            local redmew_textbox = redmew_flow.add {type = 'text-box', text = 'https://redmew.com/ '}
+            redmew_textbox.read_only = true
+            redmew_textbox.style.width = 235
+            redmew_textbox.style.height = 28
+
+
+            
             parent.add({type = 'flow'}).style.height = 24
         end
     },
@@ -386,28 +381,6 @@ local pages = {
                 donator_label.style.font_color = Color.donator
             end
 
-            grid.add {type = 'sprite', sprite = 'entity/market'}
-            local market = grid.add {type = 'label', caption = {'info.softmods_market_label'}}
-            market.style.font = 'default-listbox'
-            local market_label =
-                grid.add {
-                type = 'label',
-                caption = {'info.softmods_market_text'}
-            }
-            market_label.style.single_line = false
-
-            grid.add {type = 'sprite', sprite = 'item/small-plane'}
-            local train_savior = grid.add {type = 'label', caption = {'info.softmods_saviour_label'}}
-            local train_savior_style = train_savior.style
-            train_savior_style.font = 'default-listbox'
-            train_savior_style.single_line = false
-            local train_savior_label =
-                grid.add {
-                type = 'label',
-                caption = {'info.softmods_saviour_text'}
-            }
-            train_savior_label.style.single_line = false
-
             if config.player_list.enabled then
                 grid.add {type = 'sprite', sprite = 'entity/player'}
                 local player_list = grid.add {type = 'label', caption = {'info.softmods_plist_label'}}
@@ -522,7 +495,7 @@ local function draw_main_frame(center, player)
     local frame = center.add {type = 'frame', name = main_frame_name, direction = 'vertical'}
     local frame_style = frame.style
     frame_style.height = 600
-    frame_style.width = 650
+    frame_style.width = 800
     frame_style.left_padding = 16
     frame_style.right_padding = 16
     frame_style.top_padding = 16

@@ -8,11 +8,11 @@ global.config = {
     map_info = {
         enabled = true,
         -- The title of the map
-        map_name_key = 'This Map has no name',
+        map_name_key = 'r/seablock - Official Server Made From Water Sediment',
         -- The long description of the map, typically 1 paragraph
-        map_description_key = "This section is supposed to be filled out on a per map basis.\nIf you're seeing this message, ping the admin team to get a description\nadded for this map. 20 coins is rewarded to the first person that points this out.",
+        map_description_key = "r/seablock - Official Server Made From Water Sediment",
         -- The feature list of the map
-        map_extra_info_key = 'This map has no extra information',
+        map_extra_info_key = 'This is a placeholder for meta notes and information.',
         -- New Scenario Features, appears in the "What's new" tab
         new_info_key = 'Nothing is new. The world is at peace'
     },
@@ -60,7 +60,7 @@ global.config = {
     -- adds a player list icon and keeps track of data.
     player_list = {
         enabled = true,
-        show_coin_column = true
+        show_coin_column = false
     },
     -- enables the poll system
     poll = {
@@ -88,7 +88,7 @@ global.config = {
     },
     -- adds a market
     market = {
-        enabled = true,
+        enabled = false,
         -- will create a standard market on game startup
         create_standard_market = true,
         -- the coordinates at which the standard market will be created
@@ -128,11 +128,11 @@ global.config = {
     },
     -- adds hodor responses to messages
     hodor = {
-        enabled = true
+        enabled = false
     },
     -- enable RedMew auto respond messages
     auto_respond = {
-        enabled = true
+        enabled = false
     },
     -- enable the mentioning system, which notifies a player when their name is mentioned
     mentions = {
@@ -140,7 +140,7 @@ global.config = {
     },
     -- settings for when a player joins the server for the first time
     player_create = {
-        enabled = true,
+        enabled = false,
         -- items automatically inserted into the player inventory
         starting_items = {
             {name = 'iron-gear-wheel', count = 8},
@@ -150,7 +150,8 @@ global.config = {
         show_info_at_start = true,
         -- prints messages when the player joins
         join_messages = {
-            'Welcome to this map created by the RedMew team. You can join our discord at: redmew.com/discord',
+            'Welcome to the official r/seablock official server! You can find more information here: reddit.com/r/seablock',
+            'Discord: https://discord.gg/zkg8rdn',
             'Click the question mark in the top left corner for server information and map details.'
         },
         -- format is a table: {{message, weight}, {message, weight}}, where a higher weight has more chance to be shown
@@ -246,7 +247,7 @@ global.config = {
     },
     -- grants reward coins for certain actions
     player_rewards = {
-        enabled = true,
+        enabled = false,
         -- the token to use for rewards
         token = currency,
         -- rewards players for looking through the info tabs
@@ -334,7 +335,7 @@ global.config = {
     },
     -- enables a command which allows for an end-game event
     apocalypse = {
-        enabled = true
+        enabled = false
     },
     -- gradually informs players of features such as chat, toasts, etc.
     player_onboarding = {
