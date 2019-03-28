@@ -140,7 +140,7 @@ global.config = {
     },
     -- settings for when a player joins the server for the first time
     player_create = {
-        enabled = false,
+        enabled = true,
         -- items automatically inserted into the player inventory
         starting_items = {
             {name = 'iron-gear-wheel', count = 8},
@@ -178,8 +178,6 @@ global.config = {
                 {name = 'substation', count = 50},
                 {name = 'roboport', count = 10},
                 {name = 'infinity-chest', count = 10},
-                {name = 'small-plane', count = 2},
-                {name = 'coin', count = 20000},
                 {name = 'rocket-part', count = 2},
                 {name = 'computer', count = 2},
                 {name = 'infinity-pipe', count = 10},

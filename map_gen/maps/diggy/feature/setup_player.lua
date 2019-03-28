@@ -24,6 +24,12 @@ function SetupPlayer.register(config)
         if #cheats.starting_items > 0 then
             redmew_cheats.starting_items = cheats.starting_items
         end
+
+        game.forces["player"].technologies["mining-productivity-1"].enabled = false
+        game.forces["player"].technologies["mining-productivity-2"].enabled = false
+        game.forces["player"].technologies["mining-productivity-3"].enabled = false
+        game.forces["player"].technologies["mining-productivity-4"].enabled = false
+        
     end)
 end
 

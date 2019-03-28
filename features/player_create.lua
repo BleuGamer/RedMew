@@ -54,6 +54,12 @@ local function player_created(event)
         player.print('## - Regular commands have changed. /regular <player_name> to promote /regular-remove <player_name> to demote.')
     end
     --End remove
+
+    game.forces["player"].technologies["mining-productivity-1"].enabled = false
+    game.forces["player"].technologies["mining-productivity-2"].enabled = false
+    game.forces["player"].technologies["mining-productivity-3"].enabled = false
+    game.forces["player"].technologies["mining-productivity-4"].enabled = false
+    game.forces["player"].technologies["gas-canisters"].enabled = false
 end
 
 Event.add(defines.events.on_player_created, player_created)
