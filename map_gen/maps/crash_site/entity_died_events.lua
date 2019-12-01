@@ -2,12 +2,20 @@ local Event = require 'utils.event'
 local Task = require 'utils.task'
 local Token = require 'utils.token'
 local Global = require 'utils.global'
-local Game = require 'utils.game'
 local math = require 'utils.math'
+local table = require 'utils.table'
 
 local random = math.random
 local set_timeout_in_ticks = Task.set_timeout_in_ticks
 local ceil = math.ceil
+local draw_arc = rendering.draw_arc
+local fast_remove = table.fast_remove
+
+local tau = 2 * math.pi
+local start_angle = -tau / 4
+local update_rate = 4 -- ticks between updates
+local time_to_live = update_rate + 1
+local pole_respawn_time = 60 * 60
 
 local no_coin_entity = {}
 
@@ -44,15 +52,22 @@ local spill_items =
 )
 
 local entity_spawn_map = {
-    ['medium-biter'] = {name = 'small-biter', count = 2, chance = 1},
-    ['big-biter'] = {name = 'medium-biter', count = 2, chance = 1},
-    ['behemoth-biter'] = {name = 'big-biter', count = 2, chance = 1},
+    ['medium-biter'] = {name = 'small-worm-turret', count = 1, chance = 0.2},
+    ['big-biter'] = {name = 'medium-worm-turret', count = 1, chance = 0.2},
+    ['behemoth-biter'] = {name = 'big-worm-turret', count = 1, chance = 0.2},
     ['medium-spitter'] = {name = 'small-worm-turret', count = 1, chance = 0.2},
     ['big-spitter'] = {name = 'medium-worm-turret', count = 1, chance = 0.2},
     ['behemoth-spitter'] = {name = 'big-worm-turret', count = 1, chance = 0.2},
     ['biter-spawner'] = {type = 'biter', count = 5, chance = 1},
     ['spitter-spawner'] = {type = 'spitter', count = 5, chance = 1},
-    ['behemoth-worm-turret'] = {name = 'behemoth-spitter', count = 2, chance = 1},
+    ['behemoth-worm-turret'] = {
+        type = 'compound',
+        spawns = {
+            {name = 'behemoth-spitter', count = 2},
+            {name = 'behemoth-biter', count = 2}
+        },
+        chance = 1
+    },
     ['stone-furnace'] = {type = 'cause', count = 2, chance = 1},
     ['steel-furnace'] = {type = 'cause', count = 2, chance = 1},
     ['electric-furnace'] = {type = 'cause', count = 4, chance = 1},
@@ -170,6 +185,91 @@ local spawn_player =
     end
 )
 
+local function has_valid_turret(turrets)
+    for i = #turrets, 1, -1 do
+        local turret = turrets[i]
+        if turret.valid then
+            return true
+        else
+            fast_remove(turrets, i)
+        end
+    end
+
+    return false
+end
+
+local pole_callback
+pole_callback =
+    Token.register(
+    function(data)
+        if not has_valid_turret(data.turrets) then
+            return
+        end
+
+        local tick = data.tick
+        local now = game.tick
+
+        if now >= tick then
+            data.surface.create_entity({name = data.name, force = 'enemy', position = data.position})
+            return
+        end
+
+        local fraction = ((now - tick) / pole_respawn_time) + 1
+
+        draw_arc(
+            {
+                color = {1 - fraction, fraction, 0},
+                max_radius = 0.5,
+                min_radius = 0.4,
+                start_angle = start_angle,
+                angle = fraction * tau,
+                target = data.position,
+                surface = data.surface,
+                time_to_live = time_to_live
+            }
+        )
+
+        set_timeout_in_ticks(update_rate, pole_callback, data)
+    end
+)
+
+local filter = {area = nil, name = 'laser-turret', force = 'enemy'}
+
+local function do_pole(entity)
+    if entity.type ~= 'electric-pole' then
+        return
+    end
+
+    local supply_area_distance = entity.prototype.supply_area_distance
+    if not supply_area_distance then
+        return
+    end
+
+    local surface = entity.surface
+    local position = entity.position
+    local x, y = position.x, position.y
+    local d = supply_area_distance / 2
+    filter.area = {{x - d, y - d}, {x + d, y + d}}
+
+    local turrets = surface.find_entities_filtered(filter)
+
+    if #turrets == 0 then
+        return
+    end
+
+    set_timeout_in_ticks(
+        update_rate,
+        pole_callback,
+        {
+            name = entity.name,
+            position = position,
+            surface = surface,
+            tick = game.tick + pole_respawn_time,
+            turrets = turrets
+        }
+    )
+end
+
 Event.add(
     defines.events.on_entity_died,
     function(event)
@@ -181,9 +281,11 @@ Event.add(
         local entity_force = entity.force
         local entity_name = entity.name
 
-        local factor = turret_evolution_factor[entity_name]
-        if factor then
-            if entity_force.name == 'enemy' then
+        if entity_force.name == 'enemy' then
+            do_pole(entity)
+
+            local factor = turret_evolution_factor[entity_name]
+            if factor then
                 local old = entity_force.evolution_factor
                 local new = old + (1 - old) * factor
                 entity_force.evolution_factor = math.min(new, 1)
@@ -196,7 +298,7 @@ Event.add(
             if no_coin_entity[unit_number] then
                 no_coin_entity[unit_number] = nil
             else
-                local count = math.random(bounds.low, bounds.high)
+                local count = random(bounds.low, bounds.high)
 
                 if count > 0 then
                     set_timeout_in_ticks(
@@ -209,41 +311,44 @@ Event.add(
         end
 
         local spawn = entity_spawn_map[entity_name]
+        if not spawn then
+            return
+        end
 
-        if spawn then
-            local chance = spawn.chance
-            if chance == 1 or random() <= chance then
-                local name = spawn.name
-                if name == nil then
-                    local type = spawn.type
-                    if type == 'cause' then
-                        local cause = event.cause
-                        if not cause then
-                            return
-                        end
-                        name = cause.name
-                        if not allowed_cause_source[cause.name] then
-                            return
-                        end
-                    else
-                        name = unit_levels[type][get_level()]
-                    end
-                end
+        local chance = spawn.chance
+        if chance ~= 1 and random() > chance then
+            return
+        end
 
-                if worms[name] then
-                    set_timeout_in_ticks(
-                        5,
-                        spawn_worm,
-                        {surface = entity.surface, name = name, position = entity.position}
-                    )
-                else
-                    set_timeout_in_ticks(
-                        5,
-                        spawn_units,
-                        {surface = entity.surface, name = name, position = entity.position, count = spawn.count}
-                    )
+        local name = spawn.name
+        if name == nil then
+            local type = spawn.type
+            if type == 'cause' then
+                local cause = event.cause
+                if not cause then
+                    return
                 end
+                name = cause.name
+                if not allowed_cause_source[cause.name] then
+                    return
+                end
+            elseif type == 'compound' then
+                local spawns = spawn.spawns
+                spawn = spawns[random(#spawns)]
+                name = spawn.name
+            else
+                name = unit_levels[type][get_level()]
             end
+        end
+
+        if worms[name] then
+            set_timeout_in_ticks(5, spawn_worm, {surface = entity.surface, name = name, position = entity.position})
+        else
+            set_timeout_in_ticks(
+                5,
+                spawn_units,
+                {surface = entity.surface, name = name, position = entity.position, count = spawn.count}
+            )
         end
     end
 )
@@ -251,7 +356,7 @@ Event.add(
 Event.add(
     defines.events.on_player_died,
     function(event)
-        local player = Game.get_player_by_index(event.player_index)
+        local player = game.get_player(event.player_index)
         set_timeout_in_ticks(1, spawn_player, player)
     end
 )

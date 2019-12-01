@@ -1,30 +1,15 @@
 local table = require 'utils.table'
-local Game = require 'utils.game'
 local Event = require 'utils.event'
 local Global = require 'utils.global'
 local Info = require 'features.gui.info'
+local pairs = pairs
 
 local get_random_weighted = table.get_random_weighted
 
-local function player_created(event)
+local Public = {}
+
+function Public.show_start_up(player)
     local config = global.config.player_create
-    local player = Game.get_player_by_index(event.player_index)
-
-    if not player or not player.valid then
-        return
-    end
-
-    -- ensure the top menu is correctly styled
-    local gui = player.gui
-    gui.top.style = 'slot_table_spacing_horizontal_flow'
-    gui.left.style = 'slot_table_spacing_vertical_flow'
-
-    local player_insert = player.insert
-
-    for _, item in pairs(config.starting_items) do
-        player_insert(item)
-    end
-
     local p = player.print
     for _, message in pairs(config.join_messages) do
         p(message)
@@ -48,12 +33,29 @@ local function player_created(event)
     elseif not _DEBUG and not game.is_multiplayer() then
         player.print('To change your name in single-player, open chat and type the following /c game.player.name = "your_name"')
     end
+end
 
-    -- Remove 2019-03-04
-    if player.admin then
-        player.print('## - Regular commands have changed. /regular <player_name> to promote /regular-remove <player_name> to demote.')
+local function player_created(event)
+    local config = global.config.player_create
+    local player = game.get_player(event.player_index)
+
+    if not player or not player.valid then
+        return
     end
-    --End remove
+
+    -- ensure the top menu is correctly styled
+    local gui = player.gui
+    gui.top.style = 'slot_table_spacing_horizontal_flow'
+    gui.left.style = 'slot_table_spacing_vertical_flow'
+
+    local player_insert = player.insert
+
+    for _, item in pairs(config.starting_items) do
+        player_insert(item)
+    end
+    if not config.cutscene then
+        Public.show_start_up(player)
+    end
 
     game.forces["player"].technologies["mining-productivity-1"].enabled = false
     game.forces["player"].technologies["mining-productivity-2"].enabled = false
@@ -82,7 +84,7 @@ if _CHEATS then
 
     local function player_created_cheat_mode(event)
         local config = global.config.player_create
-        local player = Game.get_player_by_index(event.player_index)
+        local player = game.get_player(event.player_index)
 
         if not player or not player.valid then
             return
@@ -131,3 +133,5 @@ if _CHEATS then
 
     Event.add(defines.events.on_player_created, player_created_cheat_mode)
 end
+
+return Public

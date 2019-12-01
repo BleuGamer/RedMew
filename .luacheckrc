@@ -169,14 +169,14 @@ stds.factorio = {
                 "add_shift", "merge", "premul_color", "encode", "decode", "insert_safe",
                 table = {
                     fields = {
-                        "compare", "deepcopy"
+                        "compare", "deepcopy", "shallow_copy"
                     },
                 },
             },
         },
         table = {
             fields = {
-                "compare", "deepcopy"
+                "compare", "deepcopy", "shallow_copy"
             },
         },
     },
@@ -253,6 +253,12 @@ stds.factorio_control = {
                 'set_forces',
                 'get_players',
                 'set_players',
+                'get_visible',
+                'set_visible',
+                'get_draw_on_ground',
+                'set_draw_on_ground',
+                'get_only_in_alt_mode',
+                'set_only_in_alt_mode',
                 'get_color',
                 'set_color',
                 'get_width',
@@ -329,6 +335,7 @@ stds.factorio_control = {
                 "check_prototype_translations",
                 "count_pipe_groups",
                 "create_force",
+                "create_profiler",
                 "create_random_generator",
                 "create_surface",
                 "delete_surface",
@@ -336,6 +343,7 @@ stds.factorio_control = {
                 "direction_to_string",
                 "disable_replay",
                 "disable_tips_and_tricks",
+                "draw_resource_selection",
                 "force_crc",
                 "get_active_entities_count",
                 "get_entity_by_tag",
@@ -1357,12 +1365,12 @@ stds.factorio_defines = {
                         'lab_input',
                         'lab_modules',
                         'mining_drill_modules',
-                        'player_ammo',
-                        'player_armor',
-                        'player_guns',
-                        'player_main',
-                        'player_trash',
-                        'player_vehicle',
+                        'character_ammo',
+                        'character_armor',
+                        'character_guns',
+                        'character_main',
+                        'character_trash',
+                        'character_vehicle',
                         'roboport_material',
                         'roboport_robot',
                         'robot_cargo',

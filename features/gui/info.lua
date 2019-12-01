@@ -3,7 +3,6 @@ local Global = require 'utils.global'
 local Event = require 'utils.event'
 local Donator = require 'features.donator'
 local Rank = require 'features.rank_system'
-local Game = require 'utils.game'
 local PlayerRewards = require 'utils.player_rewards'
 local Server = require 'features.server'
 local Token = require 'utils.token'
@@ -78,6 +77,24 @@ local function process_changelog(data)
 end
 
 local changelog_callback = Token.register(process_changelog)
+
+--- Uploads the contents of new info tab to the server.
+-- Is triggered on closing the info window by clicking the close button or by pressing escape.
+local function upload_changelog(player)
+    if not player or not player.valid or not player.admin then
+        return
+    end
+
+    if editable_info[new_info_key] ~= config_mapinfo.new_info_key and primitives.info_edited then
+        Server.set_data('misc', 'changelog', editable_info[new_info_key])
+        primitives.info_edited = nil
+    end
+end
+
+--- Tries to download the latest changelog
+local function download_changelog()
+    Server.try_get_data('misc', 'changelog', changelog_callback)
+end
 
 local function prepare_title()
     local welcome_title = [[
@@ -184,11 +201,17 @@ local pages = {
             centered_label(parent, {'info.welcome_text'})
 
             header_label(parent, {'info.chatting_header'})
-            centered_label(parent, {'info.chatting_text', {'gui-menu.settings'}, {'gui-menu.controls'}, {'controls.toggle-console'}})
+            centered_label(
+                parent,
+                {'info.chatting_text', {'gui-menu.settings'}, {'gui-menu.controls'}, {'controls.toggle-console'}}
+            )
 
             if config_prewards.enabled and config_prewards.info_player_reward then
                 header_label(parent, {'info.free_coin_header'})
-                centered_label(parent, {'info.free_coin_text', reward_amount, reward_token, reward_amount, reward_token})
+                centered_label(
+                    parent,
+                    {'info.free_coin_text', reward_amount, reward_token, reward_amount, reward_token}
+                )
             end
 
             header_label(parent, {'info.links_header'})
@@ -214,6 +237,27 @@ local pages = {
             patreon_textbox.read_only = true
             patreon_textbox.style.width = 235
             patreon_textbox.style.height = 28
+            --centered_label(parent, {'info.links_saves'})
+            --local save_textbox_flow = parent.add {type = 'flow'}
+            --local save_textbox_flow_style = save_textbox_flow.style
+            --save_textbox_flow_style.horizontal_align = 'center'
+            --save_textbox_flow_style.horizontally_stretchable = true
+            --save_textbox_flow.add({type = 'label', caption = 'Saves: '}).style.font = 'default-bold'
+            --local save_textbox = save_textbox_flow.add {type = 'text-box', text = 'http://www.redmew.com/saves/ '}
+            --save_textbox.read_only = true
+            --save_textbox.style.width = 235
+            --save_textbox.style.height = 28
+            --centered_label(parent, {'info.links_factoriomaps'})
+            --local maps_textbox_flow = parent.add {type = 'flow'}
+            --local maps_textbox_flow_style = maps_textbox_flow.style
+            --maps_textbox_flow_style.horizontal_align = 'center'
+            --maps_textbox_flow_style.horizontally_stretchable = true
+            --maps_textbox_flow.add({type = 'label', caption = 'Maps: '}).style.font = 'default-bold'
+            --local maps_textbox =
+            --    maps_textbox_flow.add {type = 'text-box', text = 'https://factoriomaps.com/browse/redmew.html '}
+            --maps_textbox.read_only = true
+            --maps_textbox.style.width = 315
+            --maps_textbox.style.height = 28-
 
             centered_label(parent, {'info.links_redmew'})
             local redmew_flow = parent.add {type = 'flow', direction = 'horizontal'}
@@ -382,7 +426,7 @@ local pages = {
             end
 
             if config.player_list.enabled then
-                grid.add {type = 'sprite', sprite = 'entity/player'}
+                grid.add {type = 'sprite', sprite = 'entity/character'}
                 local player_list = grid.add {type = 'label', caption = {'info.softmods_plist_label'}}
                 player_list.style.font = 'default-listbox'
                 player_list.style.single_line = false
@@ -582,6 +626,12 @@ local function draw_main_frame(center, player)
     player.opened = frame
 end
 
+local function close_main_frame(frame, player)
+    upload_changelog(player)
+    Gui.destroy(frame)
+    player.gui.top[main_button_name].style = 'icon_button'
+end
+
 local function reward_player(player, index, message)
     if not config_prewards.enabled or not config_prewards.info_player_reward then
         return
@@ -605,46 +655,40 @@ local function reward_player(player, index, message)
     end
 end
 
---- Uploads the contents of new info tab to the server.
--- Is triggered on closing the info window by clicking the close button or by pressing escape.
-local function upload_changelog(event)
-    local player = event.player
-    if not player or not player.valid or not player.admin then
-        return
-    end
-
-    if editable_info[new_info_key] ~= config_mapinfo.new_info_key and primitives.info_edited then
-        Server.set_data('misc', 'changelog', editable_info[new_info_key])
-        primitives.info_edited = nil
-    end
-end
-
---- Tries to download the latest changelog
-local function download_changelog()
-    Server.try_get_data('misc', 'changelog', changelog_callback)
-end
-
 local function toggle(event)
     local player = event.player
-    local center = player.gui.center
+    local gui = player.gui
+    local center = gui.center
     local main_frame = center[main_frame_name]
+    local main_button = gui.top[main_button_name]
 
     if main_frame then
-        upload_changelog(event)
-        Gui.destroy(main_frame)
+        close_main_frame(main_frame, player)
     else
+        main_button.style = 'selected_slot_button'
+        local style = main_button.style
+        style.width = 38
+        style.height = 38
+
         draw_main_frame(center, player)
     end
 end
 
 local function player_created(event)
-    local player = Game.get_player_by_index(event.player_index)
+    local player = game.get_player(event.player_index)
     if not player or not player.valid then
         return
     end
 
     local gui = player.gui
-    gui.top.add {type = 'sprite-button', name = main_button_name, sprite = 'virtual-signal/signal-info'}
+    gui.top.add(
+        {
+            type = 'sprite-button',
+            name = main_button_name,
+            sprite = 'virtual-signal/signal-info',
+            tooltip = {'info.tooltip'}
+        }
+    )
 
     rewarded_players[player.index] = 0
     reward_player(player, info_tab_flags[1])
@@ -723,8 +767,7 @@ Gui.on_text_changed(
 Gui.on_custom_close(
     main_frame_name,
     function(event)
-        upload_changelog(event)
-        Gui.destroy(event.element)
+        close_main_frame(event.element, event.player)
     end
 )
 
