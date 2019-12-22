@@ -358,12 +358,11 @@ global.config = {
         fixed_brightness = 0.5
     },
     -- enables a command which allows for an end-game event
-    apocalypse = {
-<<<<<<< HEAD
-        enabled = false
+    --apocalypse = {
+    --    enabled = false
         -- chance behemoth biters and spitters will double on death.
-        duplicate_chance = 0.05
-    },
+    --    duplicate_chance = 0.05
+    --},
     -- gradually informs players of features such as chat, toasts, etc.
     player_onboarding = {
         enabled = true

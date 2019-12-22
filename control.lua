@@ -16,7 +16,7 @@ require 'resources.version'
 
 -- Config and map_loader dictate the map you play and the settings in it
 local config = require 'config'
-require 'map_gen.shared.map_loader' -- to change the map you're playing, modify map_selection.lua
+-- require 'map_gen.shared.map_loader' -- to change the map you're playing, modify map_selection.lua
 
 -- Specific to RedMew hosts, can be disabled safely if not hosting on RedMew servers
 require 'features.server'
@@ -85,9 +85,9 @@ end
 if config.day_night.enabled then
     require 'map_gen.shared.day_night'
 end
-if config.apocalypse.enabled then
-    require 'features.apocalypse'
-end
+--if config.apocalypse.enabled then
+--    require 'features.apocalypse'
+--end
 if config.player_onboarding.enabled then
     require 'features.player_onboarding'
 end
