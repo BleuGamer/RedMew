@@ -227,16 +227,17 @@ local pages = {
             discord_textbox.style.height = 28
 
 
-            centered_label(parent, {'info.links_patreon'})
-            local patreon_flow = parent.add {type = 'flow', direction = 'horizontal'}
-            local patreon_flow_style = patreon_flow.style
-            patreon_flow_style.horizontal_align = 'center'
-            patreon_flow_style.horizontally_stretchable = true
-            patreon_flow.add({type = 'label', caption = 'Patreon:'}).style.font = 'default-bold'
-            local patreon_textbox = patreon_flow.add {type = 'text-box', text = 'https://www.patreon.com/Seablock '}
-            patreon_textbox.read_only = true
-            patreon_textbox.style.width = 235
-            patreon_textbox.style.height = 28
+            --centered_label(parent, {'info.links_patreon'})
+            --local patreon_flow = parent.add {type = 'flow', direction = 'horizontal'}
+            --local patreon_flow_style = patreon_flow.style
+            --patreon_flow_style.horizontal_align = 'center'
+            --patreon_flow_style.horizontally_stretchable = true
+            --patreon_flow.add({type = 'label', caption = 'Patreon:'}).style.font = 'default-bold'
+            --local patreon_textbox = patreon_flow.add {type = 'text-box', text = 'https://www.patreon.com/Seablock '}
+            --patreon_textbox.read_only = true
+            --patreon_textbox.style.width = 235
+            --patreon_textbox.style.height = 28
+
             --centered_label(parent, {'info.links_saves'})
             --local save_textbox_flow = parent.add {type = 'flow'}
             --local save_textbox_flow_style = save_textbox_flow.style
@@ -503,36 +504,36 @@ local pages = {
                 score_label.style.single_line = false
             end
         end
-    },
-    {
-        tab_button = function(parent)
-            local button = parent.add {type = 'button', name = tab_button_name, caption = {'info.whats_new_button'}}
-            return button
-        end,
-        content = function(parent, player)
-            local read_only = not player.admin
-
-            header_label(parent, 'New Features')
-
-            local new_info_flow = parent.add {name = 'whatsNew_new_info_flow', type = 'flow'}
-            new_info_flow.style.horizontal_align = 'center'
-
-            local new_info_textbox =
-                new_info_flow.add {
-                type = 'text-box',
-                name = editable_textbox_name,
-                text = editable_info[new_info_key]
-            }
-            new_info_textbox.read_only = read_only
-
-            local new_info_textbox_style = new_info_textbox.style
-            new_info_textbox_style.width = 600
-            new_info_textbox_style.height = 360
-            new_info_textbox_style.left_margin = 2
-
-            Gui.set_data(new_info_textbox, new_info_key)
-        end
     }
+    --{
+    --    tab_button = function(parent)
+    --        local button = parent.add {type = 'button', name = tab_button_name, caption = {'info.whats_new_button'}}
+    --        return button
+    --    end,
+    --    content = function(parent, player)
+    --        local read_only = not player.admin
+
+    --        header_label(parent, 'New Features')
+
+    --        local new_info_flow = parent.add {name = 'whatsNew_new_info_flow', type = 'flow'}
+    --        new_info_flow.style.horizontal_align = 'center'
+
+    --        local new_info_textbox =
+    --            new_info_flow.add {
+    --            type = 'text-box',
+    --            name = editable_textbox_name,
+    --            text = editable_info[new_info_key]
+    --        }
+    --        new_info_textbox.read_only = read_only
+
+    --        local new_info_textbox_style = new_info_textbox.style
+    --        new_info_textbox_style.width = 600
+    --        new_info_textbox_style.height = 360
+    --        new_info_textbox_style.left_margin = 2
+
+    --        Gui.set_data(new_info_textbox, new_info_key)
+    --    end
+    --}
 }
 
 local function draw_main_frame(center, player)
